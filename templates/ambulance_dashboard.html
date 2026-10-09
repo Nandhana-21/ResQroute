@@ -1,0 +1,25 @@
+{% extends "base.html" %}{% block content %}
+<div class="row g-3"><div class="col-lg-7"><div id="map" class="map"></div></div>
+<div class="col-lg-5"><div class="card p-3 mb-2"><div class="d-flex justify-content-between align-items-center"><div><b id="veh"></b> <span id="cap" class="small text-muted"></span><div class="mt-1"><span id="av" class="pill grey"></span></div></div>
+<div class="text-end"><button id="tog" class="btn btn-outline-secondary btn-sm">Go Offline</button><div class="form-check small mt-1"><input type="checkbox" class="form-check-input" id="auto"><label class="form-check-label" for="auto">Auto-simulate GPS (demo)</label></div></div></div></div>
+<div id="cur"><div class="card p-3 text-muted">Waiting for emergency requests…</div></div>
+<div class="card p-3 mt-2"><h6>Trip history</h6><div id="hist" class="small text-muted"></div></div></div></div>
+{% endblock %}{% block scripts %}<script>
+const map=new LiveMap('map');let S=null;
+async function ask(p,b,m,l,c){if(await confirmDlg(m,l,c))act(p,b)}
+async function act(p,b){try{await api(p,{method:'POST',body:b});load()}catch(e){alert(e.message)}}
+$('tog').onclick=()=>act('/api/driver/availability',{availability:S.ambulance.availability==='Available'?'Offline':'Available'});
+const NL={on_the_way:'Start driving',arrived:'Mark arrived',picked_up:'Patient picked up',completed:'At hospital (finish)'};
+function routeInfo(e){const rp=map.R[e.id+'p'],rh=map.R[e.id+'h'],a=e.ambulance,pk=e.status==='picked_up',dest=pk&&e.hospital?[e.hospital.lat,e.hospital.lng]:[e.lat,e.lng];
+ const f=r=>r&&r.km!=null?r.km.toFixed(1)+' km · '+Math.round(r.min)+' min':'calculating…';
+ return `<div class="small my-2">🛣 <b>Route</b> → patient: ${f(rp)} · → hospital: ${f(rh)}<br><a target="_blank" rel="noopener" href="https://www.google.com/maps/dir/?api=1&origin=${a.lat},${a.lng}&destination=${dest[0]},${dest[1]}">Open turn-by-turn navigation in Google Maps</a></div>`}
+async function load(){S=await api('/api/driver/state');const a=S.ambulance,e=S.current;$('veh').textContent=a.vehicle;$('cap').textContent='('+a.capability+')';$('av').textContent=a.availability==='Available'?'Online · Available':a.availability==='Offline'?'Offline':a.availability;$('av').className='pill '+(a.availability==='Offline'?'grey':a.availability==='Available'?'green':'amber');
+ $('tog').textContent=a.availability==='Offline'?'Go Online':'Go Offline';$('tog').disabled=!['Available','Offline'].includes(a.availability);
+ if(!e){$('cur').innerHTML='<div class="card p-3 text-muted">Waiting for emergency requests…</div>';map.m.setView([a.lat,a.lng],14);map.put('a',[a.lat,a.lng],'🚑',a.vehicle)}
+ else{map.draw(e);$('cur').innerHTML=`<div class="card p-3 border-danger"><div class="d-flex justify-content-between"><b>Emergency #${e.id}</b><span class="badge bg-${SEV[e.severity]}">${e.severity} priority</span></div>
+ <div>${esc(e.name)} (${e.age??'?'}) - ${esc(e.type)}</div><div class="small">${esc(e.symptoms)}</div><div class="small text-muted">Patient ${e.ambulance.dist} km away · ETA ${e.ambulance.eta} min · Hospital: ${esc(e.hospital?e.hospital.name:'TBD')}</div>${routeInfo(e)}${stepper(e.status)}
+ ${e.status==='pending'?`<div class="d-flex gap-2"><button class="btn btn-success flex-fill" onclick="act('/api/driver/respond',{accept:true})">Accept</button><button class="btn btn-outline-danger flex-fill" onclick="act('/api/driver/respond',{accept:false},'Reject this emergency? It will be reassigned to another driver.','Yes, reject','btn-danger')">Reject</button></div>`
+ :`<button class="btn btn-primary w-100 mb-2" onclick="${['picked_up','completed'].includes(S.next)?'ask':'act'}('/api/driver/status',{status:'${S.next}'},'${NL[S.next]}? This updates the patient and hospital.','Yes, confirm','btn-success')">${NL[S.next]}</button><button class="btn btn-outline-secondary btn-sm w-100" onclick="act('/api/sim/${e.id}/tick',map.nextBody(S.current))">Simulate GPS movement (demo)</button>`}</div>`}
+ $('hist').innerHTML=S.history.map(h=>`<div>${esc(h.type)} - ${h.severity} - ${h.when}</div>`).join('')||'No trips yet'}
+load();setInterval(load,2500);setInterval(()=>{if($('auto').checked&&S&&S.current&&['on_the_way','picked_up'].includes(S.current.status))api('/api/sim/'+S.current.id+'/tick',{method:'POST',body:map.nextBody(S.current)}).catch(()=>{})},1500);
+</script>{% endblock %}

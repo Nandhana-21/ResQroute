@@ -1,0 +1,106 @@
+symptoms,severity
+severe chest pain and difficulty breathing,CRITICAL
+unconscious and not responding,CRITICAL
+heavy bleeding that will not stop,CRITICAL
+"face drooping, slurred speech, arm weakness",CRITICAL
+"not breathing properly, lips turning blue",CRITICAL
+chest pain spreading to left arm with sweating,CRITICAL
+seizure and unresponsive,CRITICAL
+choking and cannot speak,CRITICAL
+collapsed suddenly and unresponsive,CRITICAL
+"severe head injury after road accident, vomiting",CRITICAL
+"heavy bleeding that will not stop, unconscious and not responding",CRITICAL
+"not breathing properly, lips turning blue, unconscious and not responding",CRITICAL
+"choking and cannot speak, severe head injury after road accident, vomiting",CRITICAL
+"choking and cannot speak, seizure and unresponsive",CRITICAL
+"face drooping, slurred speech, arm weakness, unconscious and not responding",CRITICAL
+"choking and cannot speak, severe chest pain and difficulty breathing",CRITICAL
+"seizure and unresponsive, severe head injury after road accident, vomiting",CRITICAL
+"severe head injury after road accident, vomiting, severe chest pain and difficulty breathing",CRITICAL
+"choking and cannot speak, not breathing properly, lips turning blue",CRITICAL
+"face drooping, slurred speech, arm weakness, unconscious and not responding",CRITICAL
+"chest pain spreading to left arm with sweating, severe chest pain and difficulty breathing",CRITICAL
+"severe chest pain and difficulty breathing, severe head injury after road accident, vomiting",CRITICAL
+"collapsed suddenly and unresponsive, severe chest pain and difficulty breathing",CRITICAL
+"seizure and unresponsive, face drooping, slurred speech, arm weakness",CRITICAL
+"seizure and unresponsive, severe chest pain and difficulty breathing",CRITICAL
+"collapsed suddenly and unresponsive, face drooping, slurred speech, arm weakness",CRITICAL
+"choking and cannot speak, severe head injury after road accident, vomiting",CRITICAL
+"collapsed suddenly and unresponsive, face drooping, slurred speech, arm weakness",CRITICAL
+"chest pain spreading to left arm with sweating, face drooping, slurred speech, arm weakness",CRITICAL
+"face drooping, slurred speech, arm weakness, choking and cannot speak",CRITICAL
+"not breathing properly, lips turning blue, severe chest pain and difficulty breathing",CRITICAL
+"seizure and unresponsive, collapsed suddenly and unresponsive",CRITICAL
+"unconscious and not responding, heavy bleeding that will not stop",CRITICAL
+"not breathing properly, lips turning blue, unconscious and not responding",CRITICAL
+"chest pain spreading to left arm with sweating, collapsed suddenly and unresponsive",CRITICAL
+"suspected fracture after fall, severe pain",HIGH
+road accident with leg injury,HIGH
+high fever with confusion,HIGH
+"deep cut with bleeding, pressure applied",HIGH
+pregnant woman with labour pains,HIGH
+severe abdominal pain and vomiting,HIGH
+burn injury on arm and chest,HIGH
+persistent vomiting and dehydration,HIGH
+"asthma attack, inhaler helping slightly",HIGH
+allergic reaction with swelling of face,HIGH
+"burn injury on arm and chest, asthma attack, inhaler helping slightly",HIGH
+"deep cut with bleeding, pressure applied, pregnant woman with labour pains",HIGH
+"pregnant woman with labour pains, persistent vomiting and dehydration",HIGH
+"asthma attack, inhaler helping slightly, burn injury on arm and chest",HIGH
+"allergic reaction with swelling of face, suspected fracture after fall, severe pain",HIGH
+"persistent vomiting and dehydration, deep cut with bleeding, pressure applied",HIGH
+"burn injury on arm and chest, allergic reaction with swelling of face",HIGH
+"high fever with confusion, severe abdominal pain and vomiting",HIGH
+"asthma attack, inhaler helping slightly, severe abdominal pain and vomiting",HIGH
+"road accident with leg injury, persistent vomiting and dehydration",HIGH
+"asthma attack, inhaler helping slightly, road accident with leg injury",HIGH
+"high fever with confusion, asthma attack, inhaler helping slightly",HIGH
+"burn injury on arm and chest, severe abdominal pain and vomiting",HIGH
+"persistent vomiting and dehydration, suspected fracture after fall, severe pain",HIGH
+"persistent vomiting and dehydration, suspected fracture after fall, severe pain",HIGH
+"pregnant woman with labour pains, burn injury on arm and chest",HIGH
+"high fever with confusion, allergic reaction with swelling of face",HIGH
+"asthma attack, inhaler helping slightly, deep cut with bleeding, pressure applied",HIGH
+"suspected fracture after fall, severe pain, deep cut with bleeding, pressure applied",HIGH
+"asthma attack, inhaler helping slightly, allergic reaction with swelling of face",HIGH
+"deep cut with bleeding, pressure applied, burn injury on arm and chest",HIGH
+"asthma attack, inhaler helping slightly, severe abdominal pain and vomiting",HIGH
+"allergic reaction with swelling of face, severe abdominal pain and vomiting",HIGH
+"persistent vomiting and dehydration, pregnant woman with labour pains",HIGH
+"asthma attack, inhaler helping slightly, suspected fracture after fall, severe pain",HIGH
+mild fever and headache,MODERATE
+"sprained ankle, can walk with pain",MODERATE
+"minor cut, bleeding controlled",MODERATE
+stomach ache since morning,MODERATE
+dizziness but alert and talking,MODERATE
+mild allergic rash,MODERATE
+small burn on hand,MODERATE
+back pain after lifting,MODERATE
+"nausea, vomited once",MODERATE
+"twisted wrist, can move fingers",MODERATE
+"small burn on hand, nausea, vomited once",MODERATE
+"minor cut, bleeding controlled, nausea, vomited once",MODERATE
+"nausea, vomited once, stomach ache since morning",MODERATE
+"small burn on hand, mild fever and headache",MODERATE
+"back pain after lifting, mild allergic rash",MODERATE
+"twisted wrist, can move fingers, nausea, vomited once",MODERATE
+"stomach ache since morning, nausea, vomited once",MODERATE
+"small burn on hand, back pain after lifting",MODERATE
+"mild allergic rash, small burn on hand",MODERATE
+"mild allergic rash, mild fever and headache",MODERATE
+"nausea, vomited once, twisted wrist, can move fingers",MODERATE
+"twisted wrist, can move fingers, mild allergic rash",MODERATE
+"back pain after lifting, mild fever and headache",MODERATE
+"stomach ache since morning, minor cut, bleeding controlled",MODERATE
+"nausea, vomited once, minor cut, bleeding controlled",MODERATE
+"sprained ankle, can walk with pain, nausea, vomited once",MODERATE
+"dizziness but alert and talking, mild fever and headache",MODERATE
+"sprained ankle, can walk with pain, twisted wrist, can move fingers",MODERATE
+"mild fever and headache, back pain after lifting",MODERATE
+"mild fever and headache, dizziness but alert and talking",MODERATE
+"stomach ache since morning, dizziness but alert and talking",MODERATE
+"sprained ankle, can walk with pain, minor cut, bleeding controlled",MODERATE
+"mild allergic rash, dizziness but alert and talking",MODERATE
+"sprained ankle, can walk with pain, minor cut, bleeding controlled",MODERATE
+"minor cut, bleeding controlled, dizziness but alert and talking",MODERATE

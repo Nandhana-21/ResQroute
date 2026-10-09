@@ -1,0 +1,33 @@
+{% extends "base.html" %}{% block content %}
+<div class="row g-2 mb-3" id="kpis"></div>
+<div class="row g-3"><div class="col-md-6 col-xl-4"><div class="card p-3"><h6>Emergencies by day</h6><canvas id="c1"></canvas></div></div>
+<div class="col-md-6 col-xl-4"><div class="card p-3"><h6>Emergency types</h6><canvas id="c2"></canvas></div></div>
+<div class="col-md-6 col-xl-4"><div class="card p-3"><h6>Severity distribution</h6><canvas id="c3"></canvas></div></div>
+<div class="col-md-6 col-xl-4"><div class="card p-3"><h6>Ambulance utilization</h6><canvas id="c4"></canvas></div></div>
+<div class="col-md-6 col-xl-4"><div class="card p-3"><h6>Avg response time (min)</h6><canvas id="c5"></canvas></div></div>
+<div class="col-md-6 col-xl-4"><div class="card p-3"><h6>Requests by hour of day</h6><canvas id="c6"></canvas></div></div>
+<div class="col-lg-6"><div class="card p-3"><h6>🤖 AI analytics &amp; insights</h6><ul id="ins" class="small"></ul><div id="fc" class="small"></div><div id="hot" class="small text-muted"></div></div></div>
+<div class="col-lg-6"><div class="card p-3"><h6>Ambulances &amp; hospitals</h6><div id="amb" class="small"></div><hr><div id="hos" class="small"></div></div></div>
+<div class="col-12"><input id="q" class="form-control" placeholder="Search patients and emergencies…" aria-label="Search"></div>
+<div class="col-lg-6"><div class="card p-3"><h6>Patients</h6><div id="pat" class="small table-wrap"></div></div></div>
+<div class="col-lg-6"><div class="card p-3"><h6>Recent emergency requests</h6><div id="em" class="small table-wrap"></div></div></div></div>
+{% endblock %}{% block scripts %}<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script><script>
+const CH={},PAL=['#0f1d3a','#d90429','#0f9d9a','#d97706','#16a34a','#64748b','#6366f1','#94a3b8'];
+function mk(id,type,labels,data,label){const pie=type==='doughnut';if(CH[id]){CH[id].data.labels=labels;CH[id].data.datasets[0].data=data;CH[id].update();return}
+ CH[id]=new Chart($(id),{type,data:{labels,datasets:[{label:label||'',data,backgroundColor:pie?PAL:(type==='line'?'rgba(217,4,41,.1)':'#0f1d3a'),borderColor:type==='line'?'#d90429':'#0f1d3a',borderRadius:6,fill:type==='line',tension:.35,pointRadius:3}]},
+ options:{responsive:true,plugins:{legend:{display:pie,position:'bottom'},tooltip:{padding:10}},scales:pie?{}:{y:{beginAtZero:true,grid:{color:'#eef0f5'},ticks:{precision:0}},x:{grid:{display:false}}}}})}
+const tg=(k,id)=>`<button class="btn btn-sm btn-outline-secondary py-0" onclick="toggle('${k}',${id})">toggle</button>`;
+async function toggle(kind,id){await api('/api/admin/toggle',{method:'POST',body:{kind,id}});load()}
+async function load(){const q=(($('q')||{}).value||'').toLowerCase(),f=x=>JSON.stringify(x).toLowerCase().includes(q);const s=await api('/api/admin/stats'),k=s.kpi;
+ const K=[['Total emergencies',k.total],['Active',k.active],['Critical',k.critical],['Available ambulances',k.available],['Busy ambulances',k.busy],['Hospitals',k.hospitals],['Completed trips',k.completed],['Avg response (min)',k.avg_response],['Avg assignment (s)',k.avg_assign]];
+ $('kpis').innerHTML=K.map(([a,b])=>`<div class="col-6 col-md-4 col-xl"><div class="card p-2 text-center"><div class="kpi">${b}</div><div class="small text-muted">${a}</div></div></div>`).join('');
+ mk('c1','bar',s.by_day.labels,s.by_day.data,'Emergencies');mk('c2','doughnut',Object.keys(s.types),Object.values(s.types));mk('c3','doughnut',Object.keys(s.severity),Object.values(s.severity));
+ mk('c4','doughnut',Object.keys(s.utilization),Object.values(s.utilization));mk('c5','line',s.trend.labels,s.trend.data,'Minutes');mk('c6','bar',[...Array(24).keys()].map(h=>h+'h'),s.hourly,'Requests');
+ $('ins').innerHTML=s.insights.map(i=>`<li>${esc(i)}</li>`).join('');$('fc').innerHTML='<b>Demand forecast (next 3 h):</b> '+s.forecast.map(f=>`${f.hour}: ~${f.expected} req`).join(' · ');
+ $('hot').innerHTML='<b>Top zones:</b> '+s.hotspots.map(h=>`${h.zone} (${h.count})`).join(' · ');
+ const L=s.lists;$('amb').innerHTML='<b>Ambulances</b>'+L.ambulances.map(a=>`<div>${esc(a.vehicle)} - ${a.capability} - ${a.availability} ${tg('ambulance',a.id)}</div>`).join('');
+ $('hos').innerHTML='<b>Hospitals</b>'+L.hospitals.map(h=>`<div>${esc(h.name)} - beds ${h.beds} - ${h.readiness} - ED ${h.available?'on':'off'} ${tg('hospital',h.id)}</div>`).join('');
+ $('pat').innerHTML=L.patients.filter(f).map(p=>`<div class="list-row">${esc(p.name)} (${esc(p.email)}) age ${p.age??'-'} · ${esc(p.contact||'no contact')}</div>`).join('');
+ $('em').innerHTML=L.emergencies.filter(f).map(e=>`<div class="list-row">#${e.id} ${esc(e.name)} - ${esc(e.type)} - <span class="badge bg-${SEV[e.severity]}">${e.severity}</span> ${e.status} · ${e.created}</div>`).join('')||'<div class="empty">No matching emergencies</div>'}
+$('q').oninput=load;load();setInterval(load,5000);
+</script>{% endblock %}

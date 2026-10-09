@@ -1,0 +1,17 @@
+{% extends "base.html" %}{% block content %}
+<div class="row g-3"><div class="col-lg-4"><div class="card p-3"><h5 id="hn"></h5>
+<label class="form-label mt-2">Available emergency beds</label><input id="beds" type="number" min="0" max="200" class="form-control">
+<label class="form-label mt-2">Emergency readiness</label><select id="rd" class="form-select"><option>Ready</option><option>Preparing</option><option>Full</option></select>
+<div class="form-check mt-2"><input id="av" type="checkbox" class="form-check-input"><label class="form-check-label" for="av">Emergency department accepting patients</label></div>
+<button id="save" class="btn btn-primary mt-3">Update</button><div id="msg" class="small text-success mt-1"></div></div></div>
+<div class="col-lg-8"><h5>Incoming emergency patients</h5><div id="inc"></div><h6 class="mt-3">Recently arrived</h6><div id="hist" class="small text-muted"></div></div></div>
+{% endblock %}{% block scripts %}<script>
+let init=false;
+$('save').onclick=async()=>{try{await api('/api/hospital/update',{method:'POST',body:{beds:$('beds').value,readiness:$('rd').value,available:$('av').checked}});toast('Hospital status updated','success')}catch(e){alert(e.message)}};
+async function load(){const r=await api('/api/hospital/state'),h=r.hospital;$('hn').textContent=h.name;
+ if(!init){$('beds').value=h.beds;$('rd').value=h.readiness;$('av').checked=h.available;init=true}
+ $('inc').innerHTML=r.incoming.map(e=>`<div class="card p-3 mb-2 border-${SEV[e.severity]}"><div class="d-flex justify-content-between"><b>${esc(e.name)} (${e.age??'?'}) - ${esc(e.type)}</b><span class="badge bg-${SEV[e.severity]}">${e.severity}</span></div>
+ <div class="small">${esc(e.symptoms)}${e.notes?' · '+esc(e.notes):''}</div><div>🚑 ${esc(e.ambulance.vehicle)} (${e.ambulance.capability}) · <b>ETA ${e.hospital.eta} min</b> · ${LBL[e.status]}</div>${e.status==='picked_up'?'<span class="badge bg-success">Pickup confirmed</span>':''}</div>`).join('')||'<div class="text-muted">No incoming patients</div>';
+ $('hist').innerHTML=r.history.map(x=>`<div>${esc(x.name)} - ${esc(x.type)} - ${x.severity} - ${x.arrived}</div>`).join('')||'None'}
+load();setInterval(load,2500);
+</script>{% endblock %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}{% block content %}
+<div class="row g-3">
+<div class="col-12" id="home"><button class="btn sos w-100" data-bs-toggle="modal" data-bs-target="#reqModal"><i class="bi bi-telephone-fill"></i> EMERGENCY – REQUEST AMBULANCE</button>
+<div class="mt-2 d-flex flex-wrap gap-2 align-items-center"><button id="demoBtn" class="btn btn-outline-primary btn-sm">▶ Run demo scenario</button><span class="small text-muted">In immediate danger? Call 112 / 108 as well.</span></div></div>
+<div class="col-12 d-none" id="track"><div class="row g-3"><div class="col-lg-7"><div id="map" class="map"></div><div class="small text-muted mt-2">Map pins: 🧍 patient · 🚑 ambulance · 🏥 hospital · red = ambulance → patient road route, blue = patient → hospital road route</div></div><div class="col-lg-5" id="panel"></div></div></div>
+<div class="col-md-6"><div class="card p-3"><h6>Emergency contact</h6><div class="input-group"><input id="pc" class="form-control" placeholder="Name + phone"><button id="saveC" class="btn btn-outline-secondary">Save</button></div></div></div>
+<div class="col-md-6"><div class="card p-3"><h6>Past emergencies</h6><div id="hist" class="small text-muted">None yet</div></div></div></div>
+<div class="modal fade" id="reqModal" tabindex="-1"><div class="modal-dialog modal-lg"><form id="f" class="modal-content">
+<div class="modal-header bg-danger text-white"><h5 class="modal-title">Emergency request</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+<div class="modal-body row g-2"><div class="col-8"><label class="form-label">Patient name</label><input name="name" class="form-control" value="" placeholder="Patient name" required></div>
+<div class="col-4"><label class="form-label">Age</label><input name="age" type="number" min="0" max="120" class="form-control"></div>
+<div class="col-12"><label class="form-label">Symptoms</label><textarea name="symptoms" class="form-control" rows="2" required placeholder="e.g. severe chest pain, sweating"></textarea></div>
+<div class="col-md-6"><label class="form-label">Emergency type</label><select name="emergency_type" class="form-select">{% for t in ["Accident","Chest pain","Breathing difficulty","Stroke symptoms","Unconsciousness","Severe bleeding","Pregnancy emergency","Other"] %}<option>{{ t }}</option>{% endfor %}</select></div>
+<div class="col-md-6"><label class="form-label">Preferred hospital (optional)</label><select name="preferred_hospital" id="ph" class="form-select"><option value="">No preference</option></select></div>
+<div class="col-md-6"><label class="form-label">Current location</label><div class="input-group"><input id="loc" class="form-control" readonly placeholder="Detecting…"><button type="button" id="locBtn" class="btn btn-outline-secondary">📍</button></div></div>
+<div class="col-md-6"><label class="form-label">Emergency contact</label><input name="contact" id="fc" class="form-control"></div>
+<div class="col-12"><label class="form-label">Additional notes</label><input name="notes" class="form-control"></div>
+<div class="col-12 small text-muted">Prototype decision support – AI severity is not a medical diagnosis.</div><div id="ferr" class="col-12 text-danger small"></div></div>
+<div class="modal-footer"><button class="btn btn-danger btn-lg w-100">REQUEST EMERGENCY AMBULANCE</button></div></form></div></div>
+{% endblock %}{% block scripts %}<script>
+let EID=null,busy=false,map=null,LOC=null,timer=null;
+function getLoc(){$('loc').value='Detecting…';$('loc').classList.remove('is-invalid','is-valid');return new Promise(res=>{if(!navigator.geolocation){$('loc').value='Not supported';return res(null)}
+ navigator.geolocation.getCurrentPosition(p=>{LOC=[p.coords.latitude,p.coords.longitude];$('loc').classList.add('is-valid');$('loc').value=LOC.map(x=>x.toFixed(4)).join(', ');res(LOC)},()=>{$('loc').classList.add('is-invalid');$('loc').value='Permission denied - allow location';res(null)},{enableHighAccuracy:true,timeout:8000})})}
+$('reqModal').addEventListener('show.bs.modal',getLoc);$('locBtn').onclick=getLoc;
+api('/api/hospitals').then(h=>h.forEach(x=>$('ph').insertAdjacentHTML('beforeend',`<option value="${x.id}">${esc(x.name)}</option>`)));
+$('f').onsubmit=async ev=>{ev.preventDefault();$('ferr').textContent='';if(!LOC)await getLoc();if(!LOC){$('ferr').textContent='We could not detect your location. Allow location access in your browser, then tap the location button to retry.';return}
+ const d=Object.fromEntries(new FormData(ev.target));d.latitude=LOC[0];d.longitude=LOC[1];
+ const sb=ev.target.querySelector('.modal-footer button');try{await withBtn(sb,'Requesting ambulance…',async()=>{const e=await api('/api/emergency',{method:'POST',body:d});bootstrap.Modal.getInstance($('reqModal')).hide();start(e);toast('Request sent. Finding the best ambulance…','success')})}catch(x){$('ferr').textContent=x.message+' Please check the form and try again.'}};
+$('saveC').onclick=()=>api('/api/patient/profile',{method:'POST',body:{contact:$('pc').value}}).then(()=>alert('Saved'));
+$('demoBtn').onclick=runDemo;
+async function runDemo(){const c=[11.0168-0.0046,76.9558-0.0058];// fixed demo patient location near seeded fictional units
+ const e=await api('/api/emergency',{method:'POST',body:{name:'Demo Patient',age:45,symptoms:'Severe chest pain and difficulty breathing',emergency_type:'Chest pain',latitude:c[0]+0.0,longitude:c[1],demo:true,notes:'Demo scenario'}});start(e)}
+function start(e){EID=e.id;$('home').classList.add('d-none');$('track').classList.remove('d-none');if(!map)map=new LiveMap('map');map.fit=false;render(e);clearInterval(timer);timer=setInterval(poll,1500)}
+async function poll(){if(busy)return;busy=true;try{let e=await api('/api/emergency/'+EID);if(e.demo&&!['completed','cancelled'].includes(e.status)){await api('/api/sim/'+EID+'/tick',{method:'POST',body:map.nextBody(e)});e=await api('/api/emergency/'+EID)}
+ render(e);if(['completed','cancelled'].includes(e.status)){clearInterval(timer);loadHome(false)}}catch(x){}busy=false}
+function render(e){const a=e.ambulance,h=e.hospital,s=e.score;map.draw(e);
+ $('panel').innerHTML=`<div class="row g-2 mb-2"><div class="col-4"><div class="stat"><small>Ambulance ETA</small><b>${a&&e.status!=='completed'?a.eta+' min':'–'}</b></div></div><div class="col-4"><div class="stat"><small>Distance</small><b>${a?a.dist+' km':'–'}</b></div></div><div class="col-4"><div class="stat"><small>Hospital ETA</small><b>${h?h.eta+' min':'–'}</b></div></div></div><div class="card p-3 mb-2"><div class="d-flex justify-content-between"><b>${LBL[e.status]||e.status}</b><span class="badge bg-${SEV[e.severity]} fs-6">${e.severity}</span></div>${stepper(e.status)}
+ <div class="small"><b>AI severity:</b> ${e.severity} (confidence ${Math.round(e.confidence*100)}%)<br>${esc(e.reason)}</div></div>
+ ${e.status==='waiting'?'<div class="alert alert-danger">No ambulance free. Call 112 / 108 now.</div>':''}
+ ${a?`<div class="card p-3 mb-2"><b>🚑 ${esc(a.vehicle)}</b> <span class="small text-muted">(${a.capability})</span><div>ETA <b>${a.eta} min</b> · ${a.dist} km</div><div class="small text-muted">${esc(a.why)}</div>
+ <details class="small mt-1"><summary>Ranked candidates</summary>${(e.candidates||[]).map(c=>`<div>${esc(c.vehicle)} - ${c.dist} km, ETA ${c.eta} min, ${c.capability}, score ${c.score}</div>`).join('')}</details></div>`:''}
+ ${e.hospitals?`<div class="card p-3 mb-2"><b>🏥 Hospitals (top 3)</b>${e.hospitals.map((x,i)=>`<div class="small ${i?'':'fw-semibold'}">${i?'Alternative':'<span class="badge bg-success">Recommended</span>'} ${esc(x.name)} - ETA ${x.eta} min · ${x.beds} beds · ${x.available?'ED available':'ED unavailable'}</div>`).join('')}<div class="small text-muted mt-1">${esc(h.why)}</div></div>`:''}
+ ${s?`<div class="card p-3 mb-2"><b>Emergency Response Score: <span class="text-success fs-4">${s.total}/100</span></b><div class="small text-muted">${s.formula}</div>${s.breakdown.map(b=>`<div class="small">-${b.penalty} ${b.name}: ${esc(b.note)}</div>`).join('')}</div>`:''}
+ <div class="card p-3 border-warning"><b>⚠ Emergency Contact Alert (simulated)</b><div class="small">${esc(e.alert)}</div></div>`}
+async function loadHome(resume){const r=await api('/api/my/active');$('pc').value=r.contact;$('fc').value=r.contact;
+ $('hist').innerHTML=r.history.map(x=>`<div>#${x.id} ${esc(x.type)} - ${x.severity} - ${x.created}</div>`).join('')||'None yet';if(resume&&r.emergency)start(r.emergency)}
+loadHome(true).then(()=>{if(new URLSearchParams(location.search).get('demo')&&!EID){history.replaceState(null,'','/patient');runDemo()}});
+</script>{% endblock %}

@@ -1,0 +1,24 @@
+{% extends "base.html" %}{% block content %}
+<section class="hero"><div class="row align-items-center g-4"><div class="col-lg-6">
+<span class="eyebrow"><i class="bi bi-shield-check text-success"></i> Prototype emergency coordination platform</span>
+<h1 class="mt-3">Every Second Matters.<br><em>Every Route Counts.</em></h1>
+<p class="lead text-muted my-3">ResQRoute connects patients, ambulances and hospitals: intelligent ambulance allocation, live route tracking, hospital readiness and AI-assisted severity assessment in one workflow.</p>
+<div class="d-flex flex-wrap gap-2"><a href="/patient" class="btn btn-danger btn-lg px-4"><i class="bi bi-telephone-fill"></i> Request Emergency Ambulance</a>
+<form method="post" action="/demo-login"><button class="btn btn-outline-primary btn-lg px-4"><i class="bi bi-play-circle"></i> Explore Demo</button></form></div>
+<div class="numbers mt-4 d-flex flex-wrap align-items-center gap-3"><i class="bi bi-exclamation-triangle fs-3"></i><div><div class="small opacity-75">In immediate danger, call India emergency services first</div><b>112</b> <span class="opacity-75">National</span> &nbsp;·&nbsp; <b>108</b> <span class="opacity-75">Ambulance</span></div></div></div>
+<div class="col-lg-6"><div class="card p-2"><svg viewBox="0 0 520 380" role="img" aria-label="Illustration: ambulance route from patient to hospital" class="w-100"><rect width="520" height="380" rx="14" fill="#eef2f8"/>
+<g stroke="#fff" stroke-width="14" fill="none" stroke-linecap="round"><path d="M0 110h520M0 270h520M130 0v380M390 0v380"/></g><g stroke="#fff" stroke-width="6" fill="none"><path d="M0 190h520M260 0v380"/></g>
+<rect x="150" y="125" width="100" height="50" rx="6" fill="#dfe6f1"/><rect x="280" y="205" width="90" height="50" rx="6" fill="#d5eceb"/><rect x="20" y="290" width="90" height="60" rx="6" fill="#dfe6f1"/>
+<path d="M70 270H130V110H390V190" stroke="#d90429" stroke-width="5" fill="none" stroke-dasharray="10 8" stroke-linecap="round"/><path d="M390 190V270" stroke="#0f1d3a" stroke-width="5" fill="none" stroke-linecap="round"/>
+<circle cx="70" cy="270" r="12" fill="#0f9d9a"/><circle cx="390" cy="270" r="22" fill="#0f1d3a"/><path d="M390 259v22M379 270h22" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+<g transform="translate(112 92)"><rect width="38" height="24" rx="6" fill="#d90429"/><path d="M19 5v14M12 12h14" stroke="#fff" stroke-width="3"/></g><circle cx="390" cy="190" r="8" fill="#fff" stroke="#d90429" stroke-width="4"/></svg>
+<div class="small text-muted px-2 pb-1">Illustrative map graphic – not live data.</div></div></div></div></section>
+<section id="features" class="my-4"><h2 class="h4 mb-3">Built for the first critical minutes</h2><div class="row g-3">
+{% for ic,col,t,d in [('bi-truck-front','#d90429','Smart Ambulance Allocation','Ranks available units by distance, ETA and capability, and explains why one was chosen.'),('bi-geo-alt','#0f9d9a','Live Route Tracking','Road routes for driver and patient with simulated GPS movement for the demo.'),('bi-hospital','#0f1d3a','Hospital Coordination','Hospitals see incoming patients, severity and ETA, and publish bed readiness.'),('bi-cpu','#d97706','AI-Assisted Severity','Prototype classifier with transparent rules. Decision support, not a diagnosis.')] %}
+<div class="col-sm-6 col-lg-3"><div class="card fcard card-hover"><span class="fico" style="background:{{col}}1a;color:{{col}}"><i class="bi {{ic}}"></i></span><h3 class="h6">{{ t }}</h3><p class="small text-muted mb-0">{{ d }}</p></div></div>{% endfor %}</div></section>
+<section class="my-4"><div class="card p-4"><div class="row g-3 align-items-center"><div class="col-md-5"><h2 class="h5"><i class="bi bi-person-badge"></i> Ambulance driver login</h2><p class="small text-muted mb-0">Receive requests, see the route, and update trip status. Patients need no account.</p></div>
+<div class="col-md-7"><form method="post" action="/login" class="row g-2">{% if error %}<div class="col-12 text-danger small">{{ error }}</div>{% endif %}
+<div class="col-sm-5"><label class="form-label" for="e">Email</label><input id="e" class="form-control" name="email" type="email" placeholder="driver1@demo.com" required></div>
+<div class="col-sm-4"><label class="form-label" for="pw">Password</label><input id="pw" class="form-control" name="password" type="password" required></div>
+<div class="col-sm-3 d-flex align-items-end"><button class="btn btn-primary w-100">Login</button></div><div class="col-12 small text-muted">Demo: driver1–4@demo.com / demo123 · <a href="/login">Hospital / Admin login</a></div></form></div></div></div></section>
+{% endblock %}
